@@ -1,0 +1,111 @@
+/* Body styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
+
+/* Chat container */
+.chat-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Chatbox */
+.chat-box {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+/* Input container (input field and button) */
+.input-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+/* User input field */
+#user-input {
+    flex: 1;
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Button styling */
+button {
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* User message styling */
+div.user {
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    background-color: #e1f5fe;
+    text-align: left;
+    color: blue;
+}
+
+/* AI message styling */
+div.ai {
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    background-color: #e8f5e9;
+    text-align: left;
+    color: #3e8e41;
+    font-size: 1.1em;
+    line-height: 1.5;
+}
+
+div.ai ul {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+div.ai ol {
+    list-style-type: decimal;
+    margin-left: 20px;
+}
+
+div.ai li {
+    margin-bottom: 5px;
+}
+
+div.ai pre {
+    background-color: #f4f4f4;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Error message styling */
+div.error {
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    background-color: #fce4e4;
+    color: red;
+}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.min.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Ask a question..." onkeydown="checkEnter(event)">
+            <button id="send-button" onclick="sendQuestion()" disabled>Send</button>
+        </div>
+
+        <!-- Model selection dropdown -->
+        <div>
+            <label for="model-selector">Select Model: </label>
+            <select id="model-selector" onchange="chooseModel()">
+                {% for model in models %}
+                    <option value="{{ model }}">{{ model.replace('_', ' ').title() }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <script>
+        let modelSelector = document.getElementById("model-selector");
+        let chatBox = document.getElementById("chat-box");
+        let userInput = document.getElementById("user-input");
+        let sendButton = document.getElementById("send-button");
+
+        // Function to choose the model
+        function chooseModel() {
+            const modelChoice = modelSelector.value;
+
+            fetch("/choose_model", {
+                method: "POST",
+                body: new URLSearchParams({ model_choice: modelChoice }),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    addMessage(`You selected ${modelChoice}.`, "ai");
+                    sendButton.disabled = false;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Function to send the user's question
+        function sendQuestion() {
+            const question = userInput.value;
+            if (!question) return;
+
+            addMessage(`You: ${question}`, "user");
+            userInput.value = "";
+            disableInput(true);  // Disable input until we get the answer
+            addMessage("AI: Processing...", "ai");  // Show processing message
+
+            fetch("/ask_question", {
+                method: "POST",
+                body: new URLSearchParams({ question: question }),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "processing") {
+                    checkTaskStatus(data.task_id);
+                } else if (data.status === "error" && data.error) {
+                    addMessage(`Error: ${data.error}`, "error");
+                    console.error("Backend Error:", data.error);
+                    disableInput(false);
+                } else {
+                    // Format the response before adding it to the chat
+                    let formattedAnswer = formatResponse(data.answer);
+                    addMessage(formattedAnswer, "ai");
+                    disableInput(false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage("Error: An unexpected error occurred.", "error");
+                disableInput(false);
+            });
+        }
+
+        // Function to check task status periodically
+        function checkTaskStatus(taskId) {
+            setTimeout(() => {
+                fetch(`/get_answer/${taskId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "processing") {
+                            checkTaskStatus(taskId);
+                        } else {
+                            let formattedAnswer = formatResponse(data.answer);
+                            addMessage(formattedAnswer, "ai");
+                            disableInput(false);
+                        }
+                    });
+            }, 1000);
+        }
+
+        // Function to add messages to the chat box
+        function addMessage(message, sender) {
+            let messageDiv = document.createElement("div");
+            messageDiv.classList.add(sender);
+
+            // Directly format the message content (no <pre> or <br> tags)
+            messageDiv.innerHTML = message;
+
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;  // Scroll to the bottom
+        }
+
+        // Function to handle formatting of AI responses
+        function formatResponse(response) {
+            let formattedMessage = response;
+
+            // If the message contains a numbered list (like "1. item"), convert it to a list format
+            if (formattedMessage.match(/^\d+\./)) {
+                let lines = formattedMessage.split('\n');
+                let listItems = lines.map(line => {
+                    return `<li>${line.trim()}</li>`;
+                }).join('');
+                return `<ol>${listItems}</ol>`;
+            }
+
+            // If the response has multiple lines (could be code-like or paragraph), format it cleanly
+            if (formattedMessage.includes("\n")) {
+                let lines = formattedMessage.split('\n');
+                return lines.map(line => `<p>${line.trim()}</p>`).join('');
+            }
+
+            // Otherwise, just return the clean response
+            return formattedMessage;
+        }
+
+        // Check for "Enter" key press to send the question
+        function checkEnter(event) {
+            if (event.key === 'Enter') {
+                sendQuestion();
+            }
+        }
+
+        // Disable or enable input fields
+        function disableInput(disable) {
+            userInput.disabled = disable;
+            sendButton.disabled = disable;
+        }
+    </script>
+</body>
+</html>
