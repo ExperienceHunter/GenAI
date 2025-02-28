@@ -1,13 +1,23 @@
+import os
+from dotenv import load_dotenv
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
+# Load environment variables from .env file
+load_dotenv()
 
 class TinyLlamaModel:
     def __init__(self):
-        self.local_model_path = "/Users/zakwanzahid/PycharmProjects/GenAI/models/TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+        # Get model path from environment variable
+        self.local_model_path = os.getenv("TINYLLAMA_MODEL_PATH")
+
+        if not self.local_model_path:
+            raise ValueError("TINYLLAMA_MODEL_PATH environment variable is not set.")
+
         self.tokenizer = AutoTokenizer.from_pretrained(self.local_model_path)
-        self.model = AutoModelForCausalLM.from_pretrained(self.local_model_path, torch_dtype=torch.float32,
-                                                          trust_remote_code=True)
+        self.model = AutoModelForCausalLM.from_pretrained(
+            self.local_model_path, torch_dtype=torch.float32, trust_remote_code=True
+        )
 
         if not hasattr(self.model.config, "pad_token_id") or self.model.config.pad_token_id is None:
             self.model.config.pad_token_id = self.model.config.eos_token_id
@@ -31,7 +41,6 @@ class TinyLlamaModel:
             "do_sample": True
         }
 
-        # Append the user question to the conversation history
         conversation_history.append(f"Q: {question}")
         prompt = "\n".join(conversation_history[-1:]) + "\nA:"
 
@@ -39,7 +48,6 @@ class TinyLlamaModel:
         token_length = len(tokens)
 
         while token_length > MAX_TOKENS:
-            # Remove the oldest entry to fit within the token limit
             conversation_history.pop(0)
             prompt = "\n".join(conversation_history[-1:]) + "\nA:"
             tokens = self.tokenizer.encode(prompt)
@@ -73,10 +81,8 @@ class TinyLlamaModel:
         else:
             answer = generated_answer[start:end].strip()
 
-        # Append the AI answer to the conversation history
         conversation_history.append(f"A: {answer}")
 
-        # Print the entire conversation history
         print("\n".join(conversation_history))
 
         return answer

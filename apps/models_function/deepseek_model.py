@@ -1,13 +1,23 @@
+import os
+from dotenv import load_dotenv
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
+# Load environment variables from .env file
+load_dotenv()
 
 class DeepseekModel:
     def __init__(self):
-        self.local_model_path = "/Users/zakwanzahid/PycharmProjects/GenAI/models/deepseek/DeepSeek-R1-Distill-Qwen-1.5B"
+        # Get model path from environment variable
+        self.local_model_path = os.getenv("DEEPSEEK_MODEL_PATH")
+
+        if not self.local_model_path:
+            raise ValueError("DEEPSEEK_MODEL_PATH environment variable is not set.")
+
         self.tokenizer = AutoTokenizer.from_pretrained(self.local_model_path)
-        self.model = AutoModelForCausalLM.from_pretrained(self.local_model_path, torch_dtype=torch.float32,
-                                                          trust_remote_code=True)
+        self.model = AutoModelForCausalLM.from_pretrained(
+            self.local_model_path, torch_dtype=torch.float32, trust_remote_code=True
+        )
 
         if not hasattr(self.model.config, "pad_token_id") or self.model.config.pad_token_id is None:
             self.model.config.pad_token_id = self.model.config.eos_token_id

@@ -6,13 +6,13 @@ import torch
 # Load environment variables from .env file
 load_dotenv()
 
-class FineTunedTinyLlamaModel:
+class Llama3Model:
     def __init__(self):
         # Get model path from environment variable
-        self.local_model_path = os.getenv("FINE_TUNED_TINYLLAMA_MODEL_PATH")
+        self.local_model_path = os.getenv("LLAMA_3_MODEL_PATH")
 
         if not self.local_model_path:
-            raise ValueError("FINE_TUNED_TINY_LLAMA_PATH environment variable is not set.")
+            raise ValueError("LLAMA3_MODEL_PATH environment variable is not set.")
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.local_model_path)
         self.model = AutoModelForCausalLM.from_pretrained(
@@ -29,7 +29,7 @@ class FineTunedTinyLlamaModel:
         MAX_TOKENS = 2048
 
         generation_params = {
-            "max_new_tokens": 150,
+            "max_new_tokens": 1000,
             "num_beams": 1,
             "temperature": 0.7,
             "top_k": 50,

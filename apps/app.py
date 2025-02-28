@@ -6,6 +6,7 @@ import re
 from apps.models_function.deepseek_model import DeepseekModel
 from apps.models_function.tiny_llama_model import TinyLlamaModel
 from apps.models_function.fine_tuned_tiny_llama_model import FineTunedTinyLlamaModel
+from apps.models_function.llama_3_model import Llama3Model
 
 # Initialize Flask apps
 app = Flask(__name__)
@@ -16,6 +17,7 @@ models = {
     "deepseek": DeepseekModel(),
     "tiny_llama": TinyLlamaModel(),
     "fine_tuned_tiny_llama": FineTunedTinyLlamaModel(),
+    "llama_3": Llama3Model(),
 }
 
 
@@ -71,6 +73,14 @@ def ask_question():
     app.logger.info(f"Updated Conversation History: {conversation_history}")
 
     return jsonify({"answer": formatted_answer})
+
+
+@app.route("/clear_chat", methods=["POST"])
+def clear_chat():
+    session["conversation_history"] = json.dumps([])  # Reset to an empty list
+    app.logger.info("Chat history cleared successfully.")
+    return jsonify({"status": "success"})
+
 
 
 def format_response(response):
