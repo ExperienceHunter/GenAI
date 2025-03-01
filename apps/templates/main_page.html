@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}">
+</head>
+<body>
+    <div class="main-container">
+        <h1>Welcome to the Chatbot Application</h1>
+        <p>Click the button below to go to the chatbot page.</p>
+
+        <button id="go-to-chatbot" onclick="window.location.href='/chatbot'">Go to Chatbot</button>
+    </div>
+
+    <!-- Link to External JavaScript File (if needed for the main page) -->
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+</body>
+</html>

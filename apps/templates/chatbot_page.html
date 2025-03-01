@@ -23,8 +23,11 @@
         <div class="input-container">
             <input type="text" id="user-input" placeholder="Ask a question..." onkeydown="checkEnter(event)">
             <button id="send-button" onclick="sendQuestion()" disabled>Send</button>
-            <button id="clear-chat" onclick="clearChat()">Clear Chat</button> <!-- NEW -->
+            <button id="clear-chat" onclick="clearChat()">Clear Chat</button>
         </div>
+
+        <!-- Return to Main Page Button -->
+        <button id="return-button" onclick="window.location.href='/'">Return to Main Page</button>
     </div>
 
     <!-- Link to External JavaScript File -->

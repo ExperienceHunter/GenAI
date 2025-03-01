@@ -6,6 +6,7 @@ let sendButton = document.getElementById("send-button");
 // Function to choose the model
 function chooseModel() {
     const modelChoice = modelSelector.value;
+    sendButton.disabled = false;  // Enable the send button once the model is selected
 
     fetch("/choose_model", {
         method: "POST",
@@ -16,7 +17,6 @@ function chooseModel() {
     .then(data => {
         if (data.status === "success") {
             addMessage(`You selected ${modelChoice}.`, "ai");
-            sendButton.disabled = false;
         } else {
             alert(data.message);
         }
@@ -34,8 +34,7 @@ function sendQuestion() {
     disableInput(true);
 
     let loadingMessage = document.createElement("div");
-    loadingMessage.classList.add("loading-dots"); // Use dot animation
-    loadingMessage.innerHTML = `<span class="dots"><span>.</span><span>.</span><span>.</span></span>`;
+    loadingMessage.classList.add("loader"); // Use spinner animation
     chatBox.appendChild(loadingMessage);
     chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -117,21 +116,23 @@ function checkEnter(event) {
 
 // Function to clear the chat (Fix: Also clears server-side history)
 function clearChat() {
-    chatBox.innerHTML = "";  // Clear chat messages in UI
+    if (confirm("Are you sure you want to clear the chat?")) {
+        chatBox.innerHTML = "";  // Clear chat messages in UI
 
-    fetch("/clear_chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === "success") {
-            console.log("Chat history cleared.");
-        } else {
-            console.error("Failed to clear chat history.");
-        }
-    })
-    .catch(error => console.error('Error:', error));
+        fetch("/clear_chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                console.log("Chat history cleared.");
+            } else {
+                console.error("Failed to clear chat history.");
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
 }
 
 // Disable or enable input fields

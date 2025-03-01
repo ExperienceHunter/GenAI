@@ -22,8 +22,15 @@ models = {
 
 
 @app.route("/")
-def index():
-    return render_template("index.html", models=list(models.keys()))
+def main_page():
+    # This will render the main page with a button to navigate to the chatbot page
+    return render_template("main_page.html")  # Make sure to create this HTML page
+
+
+@app.route("/chatbot")
+def chatbot_page():
+    # This will render the chatbot page
+    return render_template("chatbot_page.html", models=list(models.keys()))
 
 
 @app.route("/choose_model", methods=["POST"])
@@ -80,7 +87,6 @@ def clear_chat():
     session["conversation_history"] = json.dumps([])  # Reset to an empty list
     app.logger.info("Chat history cleared successfully.")
     return jsonify({"status": "success"})
-
 
 
 def format_response(response):
