@@ -1,4 +1,4 @@
-/* Body styling */
+/* General Body Styling */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -10,7 +10,7 @@ body {
     height: 100vh;
 }
 
-/* Chat container */
+/* Chat Container */
 .chat-container {
     width: 100%;
     max-width: 600px;
@@ -33,7 +33,7 @@ body {
     scroll-behavior: smooth;
 }
 
-/* Input container */
+/* Input Container */
 .input-container {
     display: flex;
     padding: 10px;
@@ -43,7 +43,7 @@ body {
     bottom: 0;
 }
 
-/* User input field */
+/* User Input Field */
 #user-input {
     flex: 1;
     padding: 10px;
@@ -51,7 +51,7 @@ body {
     border-radius: 4px;
 }
 
-/* Button styling */
+/* Button Styling */
 button {
     padding: 10px;
     background-color: #4CAF50;
@@ -65,17 +65,17 @@ button:hover {
     background-color: #45a049;
 }
 
-/* Clear Chat Button styling */
+/* Clear Chat Button */
 #clear-chat {
-    background-color: #d9534f; /* Red background */
-    margin-left: 10px; /* Space between Send and Clear buttons */
+    background-color: #d9534f;
+    margin-left: 10px;
 }
 
 #clear-chat:hover {
-    background-color: #c9302c; /* Darker red on hover */
+    background-color: #c9302c;
 }
 
-/* User message styling */
+/* User Message Styling */
 div.user {
     padding: 8px 12px;
     border-radius: 4px;
@@ -85,7 +85,7 @@ div.user {
     color: blue;
 }
 
-/* AI message styling */
+/* AI Message Styling */
 div.ai {
     padding: 12px 15px;
     border-radius: 4px;
@@ -97,7 +97,7 @@ div.ai {
     line-height: 1.5;
 }
 
-/* Error message */
+/* Error Message */
 div.error {
     padding: 8px 12px;
     border-radius: 4px;
@@ -106,7 +106,7 @@ div.error {
     color: red;
 }
 
-/* Loading animation - Dots */
+/* Loading Animation - Dots */
 .loading-dots {
     font-size: 18px;
 }
@@ -127,14 +127,14 @@ div.error {
     100% { opacity: 0; }
 }
 
-/* Smaller loading spinner */
+/* Smaller Loading Spinner */
 .loader {
-    border: 4px solid #f3f3f3; /* Thinner border */
-    border-top: 4px solid #3498db; /* Adjusted border-top color */
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
     border-radius: 50%;
-    width: 20px;  /* Smaller width */
-    height: 20px;  /* Smaller height */
-    animation: spin 1s linear infinite; /* Faster rotation */
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -142,6 +142,7 @@ div.error {
     100% { transform: rotate(360deg); }
 }
 
+/* Kubeflow Container */
 .kubeflow-container {
     margin-top: 20px;
     text-align: center;
@@ -161,5 +162,97 @@ div.error {
     background-color: #0056b3;
 }
 
+/* Knowledge Base Page */
+.main-container {
+    width: 100%;
+    max-width: 700px;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 20px;
+}
 
+/* Title and Instructions */
+.title {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 20px;
+}
 
+/* Form Buttons Container */
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* Action Buttons Container */
+.action-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+/* File Input Styling */
+input[type="file"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+}
+
+/* Success/Error Messages */
+.message {
+    font-size: 1.1em;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.message.success {
+    color: green;
+}
+
+.message.error {
+    color: red;
+}
+
+/* Go Back Button */
+.back-button,
+.vectorize-button {
+    padding: 10px 20px;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.back-button {
+    background-color: #007bff;
+}
+
+.back-button:hover {
+    background-color: #0056b3;
+}
+
+.vectorize-button {
+    background-color: #28a745;
+}
+
+.vectorize-button:hover {
+    background-color: #218838;
+}
+
+/* Clear File Button */
+#clearFile {
+    background-color: #d9534f;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#clearFile:hover {
+    background-color: #c9302c;
+}

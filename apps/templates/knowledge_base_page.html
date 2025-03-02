@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Base</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}">
+</head>
+<body>
+    <div class="main-container">
+        <h1 class="title">Welcome to the Knowledge Base</h1>
+        <p>You can upload files here:</p>
+
+        <!-- File upload form -->
+        <form id="file-upload-form" action="/upload_file" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="fileInput">Select file:</label>
+                <input type="file" name="file" id="fileInput" />
+            </div>
+
+            <div class="form-group">
+                <p id="fileSize"></p>  <!-- This paragraph will display the file size -->
+            </div>
+
+            <div class="form-buttons">
+                <button type="button" id="clearFile">Clear</button>
+                <button type="submit">Upload</button>
+            </div>
+        </form>
+
+        <!-- Message display -->
+        <div id="message" class="message"></div>  <!-- This will display the success/error message -->
+
+        <!-- Action buttons -->
+        <div class="action-buttons">
+            <button type="button" onclick="window.location.href='/'" class="back-button">Go back to main page</button>
+            <button type="button" id="vectorizeDataBtn" class="vectorize-button">Vectorize Data</button>
+        </div>
+    </div>
+
+    <script>
+        // Ensure the DOM is fully loaded before running the script
+        window.onload = function() {
+            // Display file size when a file is selected
+            document.getElementById('fileInput').addEventListener('change', function(event) {
+                var file = event.target.files[0];  // Get the selected file
+                if (file) {
+                    var fileSize = file.size / 1024 / 1024;  // Convert size to MB
+                    document.getElementById('fileSize').textContent = 'File size: ' + fileSize.toFixed(2) + ' MB';
+                } else {
+                    document.getElementById('fileSize').textContent = '';  // Clear size if no file is selected
+                }
+            });
+
+            // Clear file input and file size display
+            document.getElementById('clearFile').addEventListener('click', function() {
+                var fileInput = document.getElementById('fileInput');
+                fileInput.value = '';  // Clear file input
+                document.getElementById('fileSize').textContent = '';  // Clear file size display
+            });
+
+            // Handle form submission with AJAX to display success/error message
+            document.getElementById('file-upload-form').addEventListener('submit', function(event) {
+                event.preventDefault();  // Prevent default form submission
+
+                var formData = new FormData(this);  // Create a FormData object from the form
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/upload_file', true);
+
+                // Set up callback for when the request is completed
+                xhr.onload = function() {
+                    var messageElement = document.getElementById('message');
+                    if (xhr.status === 200) {
+                        // Success response
+                        messageElement.style.color = 'green';
+                        messageElement.textContent = 'Upload successful!';
+                    } else {
+                        // Error response
+                        messageElement.style.color = 'red';
+                        messageElement.textContent = 'Error during upload. Please try again.';
+                    }
+                };
+
+                // Send the form data
+                xhr.send(formData);
+            });
+
+            // Handle Vectorize Data Button click
+            document.getElementById('vectorizeDataBtn').addEventListener('click', function() {
+                vectorizeData();
+            });
+        };
+
+        // Function to trigger actual vectorization
+        function vectorizeData() {
+            var messageElement = document.getElementById('message');
+            messageElement.style.color = 'blue';
+            messageElement.textContent = 'Data vectorization in progress...';
+
+            // Make an AJAX call to the backend to perform vectorization
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/vectorize', true);
+
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        messageElement.style.color = 'green';
+                        messageElement.textContent = 'Data has been successfully vectorized!';
+                    } else {
+                        messageElement.style.color = 'red';
+                        messageElement.textContent = 'Error during vectorization: ' + response.error;
+                    }
+                } else {
+                    messageElement.style.color = 'red';
+                    messageElement.textContent = 'Error: ' + xhr.statusText;
+                }
+            };
+
+            xhr.onerror = function() {
+                messageElement.style.color = 'red';
+                messageElement.textContent = 'Error: ' + xhr.statusText;
+            };
+
+            xhr.send();
+        }
+    </script>
+</body>
+</html>
