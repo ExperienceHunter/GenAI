@@ -12,16 +12,16 @@ if 'bitsandbytes' in sys.modules:
 # Load the dataset
 dataset_path = "/Users/zakwanzahid/PycharmProjects/GenAI/datasets/WildChat-1M"
 ds = load_dataset(dataset_path)
-ds["train"] = ds["train"].select(range(500))
+ds["train"] = ds["train"].select(range(10))
 
 # Load TinyLlama model and tokenizer
 tinyllama_model_path = "/Users/zakwanzahid/PycharmProjects/GenAI/models/TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 tokenizer_tinyllama = AutoTokenizer.from_pretrained(tinyllama_model_path)
 model_tinyllama = AutoModelForCausalLM.from_pretrained(tinyllama_model_path)
 
-# Skip quantization and proceed with the model as is (no optimization for now)
-model_tinyllama = model_tinyllama.to(torch.device("cpu"))
-
+# Dynamically set device (CPU or GPU)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model_tinyllama = model_tinyllama.to(device)
 
 # Preprocessing function
 def preprocess_data(examples):
@@ -38,8 +38,6 @@ def preprocess_data(examples):
     tokenized['labels'] = tokenized['input_ids'].copy()
 
     return tokenized
-
-
 
 # Apply the map function to preprocess the dataset
 train_data = ds["train"].map(preprocess_data, batched=True)
@@ -70,9 +68,9 @@ for epoch in range(num_epochs):
 
         optimizer.zero_grad()
 
-        # Move data to CPU (if it's not already)
-        input_ids = batch['input_ids'].to(torch.device("cpu"))
-        attention_mask = batch['attention_mask'].to(torch.device("cpu"))
+        # Move data to the selected device (CPU or GPU)
+        input_ids = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
 
         # Forward pass through the model
         outputs = model_tinyllama(input_ids, attention_mask=attention_mask, labels=input_ids)

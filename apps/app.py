@@ -12,7 +12,6 @@ import logging
 from apps.knowledge_base_function.process_documents import process_documents
 
 # Initialize Flask app
-from apps.models_function.deepseek_model import DeepseekModel
 from apps.models_function.fine_tuned_tiny_llama_model import FineTunedTinyLlamaModel
 from apps.models_function.llama_3_model import Llama3Model
 from apps.models_function.tiny_llama_model import TinyLlamaModel
@@ -44,8 +43,6 @@ if not minio_client.bucket_exists(document_bucket):
 
 # Model dictionary for faster lookups (Example models)
 models = {
-    "deepseek": DeepseekModel(),
-    "tiny_llama": TinyLlamaModel(),
     "fine_tuned_tiny_llama": FineTunedTinyLlamaModel(),
     "llama_3": Llama3Model(),
 }

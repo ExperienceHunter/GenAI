@@ -63,9 +63,9 @@ class FineTunedTinyLlamaModel:
 
         generated_answer = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-        # Extract only the model's latest answer
+        # Extract only the model's latest answer (after "A:")
         if "A:" in generated_answer:
-            answer = generated_answer.split("A:")[-1].strip()
+            answer = generated_answer.split("A:")[-1].split("\n")[0].strip()  # Only extract the first answer after A:
         else:
             answer = generated_answer.strip()
 

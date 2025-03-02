@@ -6,6 +6,7 @@ import torch
 # Load environment variables from .env file
 load_dotenv()
 
+
 class Llama3Model:
     def __init__(self):
         # Get model path from environment variable
@@ -15,6 +16,11 @@ class Llama3Model:
             raise ValueError("LLAMA3_MODEL_PATH environment variable is not set.")
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.local_model_path)
+
+        # Set pad_token if not already set
+        if not self.tokenizer.pad_token:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+
         self.model = AutoModelForCausalLM.from_pretrained(
             self.local_model_path, torch_dtype=torch.float32, trust_remote_code=True
         )
@@ -29,7 +35,7 @@ class Llama3Model:
         MAX_TOKENS = 2048
 
         generation_params = {
-            "max_new_tokens": 1000,
+            "max_new_tokens": 150,
             "num_beams": 1,
             "temperature": 0.7,
             "top_k": 50,
