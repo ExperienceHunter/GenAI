@@ -20,17 +20,19 @@
             </select>
         </div>
 
+        <!-- Input and Buttons -->
         <div class="input-container">
-            <input type="text" id="user-input" placeholder="Ask a question..." onkeydown="checkEnter(event)">
+            <input type="text" id="user-input" placeholder="Ask a question..." onkeydown="checkEnter(event)" autocomplete="off">
             <button id="send-button" onclick="sendQuestion()" disabled>Send</button>
             <button id="clear-chat" onclick="clearChat()">Clear Chat</button>
         </div>
 
         <!-- Return to Main Page Button -->
-        <button id="return-button" onclick="window.location.href='/'">Return to Main Page</button>
+        <div class="kubeflow-container">
+            <button id="return-button" onclick="window.location.href='/'">Return to Main Page</button>
+        </div>
     </div>
 
-    <!-- Link to External JavaScript File -->
     <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 </body>
 </html>

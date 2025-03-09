@@ -1,0 +1,100 @@
+/* Kubeflow Container */
+.kubeflow-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.kubeflow-container button {
+    padding: 12px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    border-radius: 8px;
+}
+
+.kubeflow-container button:hover {
+    background-color: #0056b3;
+}
+
+/* Knowledge Base Styling */
+.main-container {
+    width: 100%;
+    max-width: 700px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+/* Form Buttons Container */
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* File Input Styling */
+input[type="file"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    width: 100%;
+}
+
+/* Action Buttons */
+.action-buttons button {
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+}
+
+.action-buttons .back-button {
+    background-color: #007bff;
+    color: white;
+}
+
+.action-buttons .back-button:hover {
+    background-color: #0056b3;
+}
+
+.action-buttons .vectorize-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.action-buttons .vectorize-button:hover {
+    background-color: #218838;
+}
+
+/* Success/Error Messages */
+.message {
+    font-size: 1.1rem;
+    text-align: center;
+    margin-top: 20px;
+    color: #333;
+}
+
+.message.success {
+    color: #28a745;
+}
+
+.message.error {
+    color: #e74c3c;
+}
+
+/* Clear File Button */
+#clearFile {
+    background-color: #d9534f;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#clearFile:hover {
+    background-color: #c9302c;
+}

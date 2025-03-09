@@ -260,3 +260,20 @@ document.getElementById('vectorizeDataBtn').addEventListener('click', function()
         messageElement.textContent = 'Error: ' + error;
     });
 });
+
+document.getElementById('nightmode-toggle').addEventListener('click', function() {
+    document.body.classList.toggle('nightmode');
+    // Optionally, save the user's preference to localStorage to persist the theme across sessions
+    if (document.body.classList.contains('nightmode')) {
+        localStorage.setItem('theme', 'nightmode');
+    } else {
+        localStorage.removeItem('theme');
+    }
+});
+
+// Check if the user has a saved theme preference and apply it
+window.onload = function() {
+    if (localStorage.getItem('theme') === 'nightmode') {
+        document.body.classList.add('nightmode');
+    }
+};

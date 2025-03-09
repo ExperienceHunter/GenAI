@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Page</title>
+    <title>GenAi Platform</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}">
 </head>
 <body>
     <div class="main-container">
-        <h1>Welcome to the GenAI Platform</h1>
-        <p>Click the button below to go to the chatbot page.</p>
-
-        <button id="go-to-chatbot" onclick="window.location.href='/chatbot'">Go to Chatbot</button>
-
-        <p>Click the button below to visit the Knowledge Base.</p>
-        <button id="go-to-knowledge-base" onclick="window.location.href='/knowledge-base'">Go to Knowledge Base</button>
+        <h1>GenAi Platform</h1>
+        <button id="go-to-chatbot" onclick="window.location.href='/chatbot'">Chatbot</button>
+        <div class="button-container">
+            <button id="go-to-knowledge-base" onclick="window.location.href='/knowledge-base'">Knowledge Base</button>
+            <button onclick="window.location.href='/prompt-repository'">Prompt Repository</button>
+            <button onclick="window.location.href='/datasets'">Datasets</button>
+            <button onclick="window.location.href='/models'">Models</button>
+            <button onclick="window.location.href='/fine-tuning'">Fine-tuning</button>
+            <button onclick="window.location.href='/database'">Database</button>
+        </div>
     </div>
 
-    <!-- Link to External JavaScript File (if needed for the main page) -->
     <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 </body>
 </html>
