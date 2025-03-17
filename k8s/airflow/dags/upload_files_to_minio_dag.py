@@ -1,23 +1,32 @@
 from datetime import datetime, timedelta
 import json
 import pytz
+import os
+from minio import Minio
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.dagrun_operator import TriggerDagRunOperator
 from airflow.models.param import Param
-from minio import Minio
-import os
 
 # Define your local timezone
 LOCAL_TIMEZONE = "Asia/Tokyo"
 
 def get_local_time():
+    """ Return current time in the specified local timezone. """
     return datetime.now(pytz.timezone(LOCAL_TIMEZONE))
 
 
-# Global variable to store metadata (passed between tasks)
-metadata = {}
+# MinIO client setup function
+def get_minio_client():
+    """ Setup and return a MinIO client. """
+    return Minio(
+        "host.docker.internal:9000",
+        access_key="minioadmin",
+        secret_key="minioadmin",
+        secure=False,
+    )
+
 
 def check_file_exists(**kwargs):
     """ Check if the file/folder exists before proceeding. """
@@ -27,13 +36,12 @@ def check_file_exists(**kwargs):
     if not os.path.exists(upload_path):
         raise FileNotFoundError(f"Error: Path {upload_path} does not exist!")
 
-    # Store the path in XCom for next tasks
     kwargs['ti'].xcom_push(key='upload_path', value=upload_path)
     print(f"Path {upload_path} exists, proceeding...")
 
 
 def generate_metadata(**kwargs):
-    """ Generate metadata before uploading files. """
+    """ Generate metadata for upload. """
     ti = kwargs['ti']
     upload_path = ti.xcom_pull(task_ids='check_file_exists', key='upload_path')
     dag_run_conf = kwargs.get('dag_run', None)
@@ -45,13 +53,12 @@ def generate_metadata(**kwargs):
     base_folder = f"{today}/"
     run_folder = f"{base_folder}{run_timestamp}/"
 
-    # Store metadata in XCom
     metadata = {
         "bucket_name": bucket_name,
         "upload_path": upload_path,
         "dag_run_timestamp": run_timestamp,
         "run_folder": run_folder,
-        "uploaded_files": []  # Will be populated in the next step
+        "uploaded_files": []
     }
     ti.xcom_push(key='metadata', value=metadata)
     print(f"Generated metadata: {metadata}")
@@ -66,19 +73,12 @@ def upload_to_minio(**kwargs):
     upload_path = metadata["upload_path"]
     run_folder = metadata["run_folder"]
 
-    # MinIO client setup
-    client = Minio(
-        "host.docker.internal:9000",
-        access_key="minioadmin",
-        secret_key="minioadmin",
-        secure=False,
-    )
+    client = get_minio_client()
 
-    # Ensure MinIO bucket exists
     if not client.bucket_exists(bucket_name):
         client.make_bucket(bucket_name)
 
-    # Create an empty ".keep" file to simulate a directory
+    # Upload placeholder file to simulate directory structure
     keep_file = "/tmp/.keep"
     with open(keep_file, "wb") as f:
         f.write(b"")
@@ -86,8 +86,6 @@ def upload_to_minio(**kwargs):
     client.fput_object(bucket_name, f"{run_folder}.keep", keep_file)
 
     uploaded_files = []
-
-    # If uploading a single file
     if os.path.isfile(upload_path):
         file_name = os.path.basename(upload_path)
         minio_path = f"{run_folder}{file_name}"
@@ -95,7 +93,6 @@ def upload_to_minio(**kwargs):
         uploaded_files.append(minio_path)
         print(f"Uploaded: {upload_path} → {bucket_name}/{minio_path}")
     else:
-        # If uploading a folder, recursively upload all files inside
         for root, _, files in os.walk(upload_path):
             for file in files:
                 file_path = os.path.join(root, file)
@@ -105,78 +102,53 @@ def upload_to_minio(**kwargs):
                 uploaded_files.append(minio_path)
                 print(f"Uploaded: {file_path} → {bucket_name}/{minio_path}")
 
-    # Update metadata with uploaded files list
     metadata["uploaded_files"] = uploaded_files
-
-    # Save metadata to a JSON file
     metadata_file_path = "/tmp/upload_metadata.json"
     with open(metadata_file_path, "w") as metadata_file:
         json.dump(metadata, metadata_file, indent=4)
 
-    # Upload metadata file to MinIO
     metadata_minio_path = f"{run_folder}metadata.json"
     client.fput_object(bucket_name, metadata_minio_path, metadata_file_path)
     print(f"Metadata uploaded: {metadata_file_path} → {bucket_name}/{metadata_minio_path}")
 
-    # Push metadata to XCom for the second DAG to access
     ti.xcom_push(key='metadata', value=metadata)
 
 
 def copy_metadata_to_text_document_bucket(**kwargs):
-    """ Create the folder structure and copy metadata to the 'text-document' bucket. """
+    """ Copy metadata to the 'text-document' bucket. """
     ti = kwargs['ti']
     metadata = ti.xcom_pull(task_ids='upload_to_minio', key='metadata')
 
-    # Print the original metadata
     print(f"Original metadata: {metadata}")
 
-    bucket_name = metadata["bucket_name"]
-    run_folder = metadata["run_folder"]
-
-    # MinIO client setup
-    client = Minio(
-        "host.docker.internal:9000",
-        access_key="minioadmin",
-        secret_key="minioadmin",
-        secure=False,
-    )
-
-    # Define the 'text-document' bucket
+    client = get_minio_client()
     target_bucket_name = "text-document"
-
-    # Modify the bucket_name to 'text-document'
     metadata["bucket_name"] = target_bucket_name
 
-    # Print the modified metadata to ensure bucket_name is changed
     print(f"Modified metadata: {metadata}")
 
-    # Ensure the 'text-document' bucket exists
     if not client.bucket_exists(target_bucket_name):
         client.make_bucket(target_bucket_name)
 
-    # Create the same folder structure in 'text-document'
+    # Create placeholder file to simulate folder structure
     keep_file = "/tmp/.keep"
     with open(keep_file, "wb") as f:
         f.write(b"")
 
-    client.fput_object(target_bucket_name, f"{run_folder}.keep", keep_file)
+    client.fput_object(target_bucket_name, f"{metadata['run_folder']}.keep", keep_file)
 
-    # Save the modified metadata to a file and upload to 'text-document' bucket
-    metadata_file_path = f"/tmp/upload_metadata.json"
+    metadata_file_path = "/tmp/upload_metadata.json"
     with open(metadata_file_path, 'w') as f:
         json.dump(metadata, f, indent=4)
 
-    # Fix the run_folder to prevent double slashes
-    run_folder = run_folder.rstrip('/')
-
-    target_metadata_path = f"{run_folder}/metadata.json"
+    target_metadata_path = f"{metadata['run_folder'].rstrip('/')}/metadata.json"
     client.fput_object(target_bucket_name, target_metadata_path, metadata_file_path)
 
     print(f"Metadata copied to: {target_bucket_name}/{target_metadata_path}")
 
 
 def trigger_second_dag(**kwargs):
-    """Trigger the second DAG after uploading files and copying metadata."""
+    """Trigger the second DAG after file upload. """
     dag_run_conf = kwargs.get('dag_run', None)
     run_id = dag_run_conf.run_id if dag_run_conf else 'default_run_id'
 
@@ -184,7 +156,7 @@ def trigger_second_dag(**kwargs):
     run_folder = metadata.get("run_folder", None)
 
     if not run_folder:
-        raise ValueError("run_folder is not found in the metadata. Cannot proceed with triggering the second DAG.")
+        raise ValueError("run_folder not found in metadata.")
 
     conf = {
         "document_folder": run_folder,
@@ -194,8 +166,8 @@ def trigger_second_dag(**kwargs):
     kwargs['ti'].xcom_push(key='run_id', value=run_id)
 
     return {
-        'dag_id': 'process_documents_and_upload_text',  # Name of the second DAG
-        'conf': conf,  # Passing conf to the second DAG
+        'dag_id': 'process_documents_and_upload_text',
+        'conf': conf,
     }
 
 
@@ -211,7 +183,7 @@ default_args = {
 dag = DAG(
     'upload_files_to_minio_dag',
     default_args=default_args,
-    description='Uploads files/folders to MinIO with structured date-time folders and metadata',
+    description='Uploads files to MinIO with structured folders and metadata',
     schedule_interval=None,
     catchup=False,
     params={
@@ -220,35 +192,14 @@ dag = DAG(
     },
 )
 
-# Define tasks
-check_task = PythonOperator(
-    task_id='check_file_exists',
-    python_callable=check_file_exists,
-    dag=dag,
-)
-
-metadata_task = PythonOperator(
-    task_id='generate_metadata',
-    python_callable=generate_metadata,
-    dag=dag,
-)
-
-upload_task = PythonOperator(
-    task_id='upload_to_minio',
-    python_callable=upload_to_minio,
-    dag=dag,
-)
-
-copy_metadata_task = PythonOperator(
-    task_id='copy_metadata_to_text_document',
-    python_callable=copy_metadata_to_text_document_bucket,
-    dag=dag,
-)
-
-# Define the trigger operator to trigger the second DAG
+# Task definitions
+check_task = PythonOperator(task_id='check_file_exists', python_callable=check_file_exists, dag=dag)
+metadata_task = PythonOperator(task_id='generate_metadata', python_callable=generate_metadata, dag=dag)
+upload_task = PythonOperator(task_id='upload_to_minio', python_callable=upload_to_minio, dag=dag)
+copy_metadata_task = PythonOperator(task_id='copy_metadata_to_text_document', python_callable=copy_metadata_to_text_document_bucket, dag=dag)
 trigger_second_dag_task = TriggerDagRunOperator(
     task_id='trigger_second_dag',
-    trigger_dag_id='process_documents_and_upload_text',  # Name of the second DAG
+    trigger_dag_id='process_documents_and_upload_text',
     conf={
         "document_folder": "{{ ti.xcom_pull(task_ids='generate_metadata', key='metadata')['run_folder'] }}",
         "text_document_folder": "{{ ti.xcom_pull(task_ids='generate_metadata', key='metadata')['run_folder'] }}",
@@ -256,5 +207,5 @@ trigger_second_dag_task = TriggerDagRunOperator(
     dag=dag,
 )
 
-# Set task execution order
+# Task dependencies
 check_task >> metadata_task >> upload_task >> copy_metadata_task >> trigger_second_dag_task
