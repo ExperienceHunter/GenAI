@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  title: My API Server
+  version: 1.0.0
+  description: A simple Express API with YAML Swagger
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /users:
+    get:
+      summary: Get all users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+    post:
+      summary: Create a new user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: User created
+
+  /elasticsearch/search:
+    post:
+      summary: Search documents in Elasticsearch with a query body
+      tags:
+        - Elasticsearch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                index:
+                  type: string
+                  default: document-embeddings
+                  description: The index to search in
+                body:
+                  type: object
+                  description: Full Elasticsearch query body
+                  example:
+                    query:
+                      match:
+                        text: "example text"
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '500':
+          description: Elasticsearch search failed
+
+  /elasticsearch/index:
+    post:
+      summary: Index a new document in Elasticsearch
+      tags:
+        - Elasticsearch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - content
+              properties:
+                id:
+                  type: string
+                content:
+                  type: string
+                index:
+                  type: string
+                  default: document-embeddings
+                  description: The index to store the document in (defaults to "document-embeddings" if not specified)
+      responses:
+        '201':
+          description: Document indexed successfully
+        '500':
+          description: Elasticsearch index failed
