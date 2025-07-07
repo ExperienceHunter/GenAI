@@ -32,9 +32,9 @@ spec:
             - --console-address
             - ":9001"
           ports:
-            - name: api-port    # ✅ Added port name
+            - name: api-port
               containerPort: 9000
-            - name: console-port  # ✅ Added port name
+            - name: console-port
               containerPort: 9001
           env:
             - name: MINIO_ROOT_USER
@@ -54,15 +54,17 @@ kind: Service
 metadata:
   name: minio-service
 spec:
+  type: NodePort
   selector:
     app: minio
   ports:
-    - name: api-port  # ✅ Added port name
+    - name: api-port
       protocol: TCP
       port: 9000
       targetPort: 9000
-    - name: console-port  # ✅ Added port name
+      nodePort: 30000  # ✅ Fixed API port
+    - name: console-port
       protocol: TCP
       port: 9001
       targetPort: 9001
-  type: NodePort
+      nodePort: 30001  # ✅ Fixed Console port
