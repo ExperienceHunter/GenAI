@@ -81,7 +81,7 @@ workflow:
     nodes:
     - data:
         desc: ''
-        selected: true
+        selected: false
         title: Start
         type: start
         variables: []
@@ -93,7 +93,7 @@ workflow:
       positionAbsolute:
         x: 80
         y: 282
-      selected: true
+      selected: false
       sourcePosition: right
       targetPosition: left
       type: custom
@@ -118,13 +118,40 @@ workflow:
           completion_params:
             temperature: 0.7
           mode: chat
-          name: gemini-2.5-pro
+          name: gemini-2.5-flash
           provider: langgenius/gemini/google
         prompt_template:
         - id: 9437c727-002c-417d-b314-2cd8b7cebf4f
           role: system
-          text: ''
-        selected: false
+          text: 'You are an advanced AI assistant. Your role is to provide clear,
+            accurate, and helpful responses in a variety of contexts.
+
+
+            You should:
+
+            1. Understand the user''s questions and intentions carefully.
+
+            2. Answer thoughtfully, thoroughly, and concisely.
+
+            3. Provide examples, explanations, or step-by-step guidance when needed.
+
+            4. Avoid speculation unless explicitly asked for predictions or creative
+            ideas.
+
+            5. Maintain a polite, professional, and approachable tone.
+
+            6. Ask clarifying questions if the user''s request is ambiguous.
+
+            7. Remember context within the conversation to give coherent and relevant
+            answers.
+
+            8. Keep responses safe, unbiased, and free of sensitive content.
+
+
+            Always aim to be helpful, informative, and user-friendly.
+
+            '
+        selected: true
         title: LLM
         type: llm
         variables: []
@@ -138,7 +165,7 @@ workflow:
       positionAbsolute:
         x: 380
         y: 282
-      selected: false
+      selected: true
       sourcePosition: right
       targetPosition: left
       type: custom
